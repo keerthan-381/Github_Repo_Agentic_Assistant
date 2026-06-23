@@ -72,13 +72,12 @@ class HybridRetriever:
 
         self.documents = documents
 
-        self.dense_retriever = (
-            vectordb.as_retriever(
-                search_kwargs={
-                    "k": 30
-                }
+        if vectordb is not None:
+            self.dense_retriever = (
+                vectordb.as_retriever(
+                    search_kwargs={"k": 30}
+                )
             )
-        )
 
         self.bm25_retriever = (
             BM25Retriever.from_documents(
@@ -180,10 +179,12 @@ class HybridRetriever:
 
         for query in queries:
 
-            dense_docs = (
-                self.dense_retriever
-                .invoke(query)
-            )
+            dense_docs = []
+            if hasattr(self, "dense_retriever") and self.dense_retriever is not None:
+                dense_docs = (
+                    self.dense_retriever
+                    .invoke(query)
+                )
 
             sparse_docs = (
                 self.bm25_retriever
