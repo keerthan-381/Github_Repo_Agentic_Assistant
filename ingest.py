@@ -1,17 +1,13 @@
 from langchain_chroma import Chroma
 
-from langchain_huggingface import (
-    HuggingFaceEmbeddings
-)
+from langchain_community.embeddings import FastEmbedEmbeddings
 
 from document_loader import (
     load_repository_documents
 )
 
 
-EMBEDDING_MODEL = (
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
+EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
 DB_PATH = "./chroma_db"
 
@@ -35,7 +31,7 @@ def create_vector_store(
             )
 
     embeddings = (
-        HuggingFaceEmbeddings(
+        FastEmbedEmbeddings(
             model_name=
             EMBEDDING_MODEL
         )
