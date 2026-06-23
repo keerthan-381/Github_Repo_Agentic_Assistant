@@ -10,7 +10,7 @@ langchain-huggingface
 
 chromadb
 
-sentence-transformers
+fastembed
 
 gitpython
 
