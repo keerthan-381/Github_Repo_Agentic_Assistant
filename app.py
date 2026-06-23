@@ -72,10 +72,14 @@ async def load_repo(data: LoadRepoRequest, background_tasks: BackgroundTasks):
     return {"session_id": session_id, "status": "started"}
 
 
+import traceback as _tb
+
 async def _load_repo_task(repo_url: str, session_id: str):
     """Background task to clone and index a repository."""
     # Lazy imports: defer heavy ML libraries until first use.
     # This keeps the FastAPI app startup fast enough for Render's port detection.
+    import sys
+    print(f"[BG TASK {session_id}] Starting background task", flush=True)
     from ingest import create_vector_store
     from qa_chain import build_qa_chain
 
@@ -92,13 +96,17 @@ async def _load_repo_task(repo_url: str, session_id: str):
         _status[session_id]["message"] = "Indexing repository..."
         _status[session_id]["progress"] = 40
 
+        print(f"[BG TASK {session_id}] About to call create_vector_store...", flush=True)
         vectordb, documents = create_vector_store(repo_path)
+        print(f"[BG TASK {session_id}] create_vector_store done, documents={len(documents)}", flush=True)
 
         _status[session_id]["status"] = "building"
         _status[session_id]["message"] = "Preparing QA chain..."
         _status[session_id]["progress"] = 80
 
+        print(f"[BG TASK {session_id}] About to call build_qa_chain...", flush=True)
         qa_chain = build_qa_chain(vectordb, documents)
+        print(f"[BG TASK {session_id}] build_qa_chain done", flush=True)
 
         _sessions[session_id] = {
             "qa_chain": qa_chain,
@@ -162,4 +170,3 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
