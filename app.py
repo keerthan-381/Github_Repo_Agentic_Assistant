@@ -10,8 +10,6 @@ from typing import Optional
 from dotenv import load_dotenv
 
 from clone_repo import clone_repository
-from ingest import create_vector_store
-from qa_chain import build_qa_chain
 
 load_dotenv()
 
@@ -76,6 +74,11 @@ async def load_repo(data: LoadRepoRequest, background_tasks: BackgroundTasks):
 
 async def _load_repo_task(repo_url: str, session_id: str):
     """Background task to clone and index a repository."""
+    # Lazy imports: defer heavy ML libraries until first use.
+    # This keeps the FastAPI app startup fast enough for Render's port detection.
+    from ingest import create_vector_store
+    from qa_chain import build_qa_chain
+
     try:
         _status[session_id]["status"] = "cloning"
         _status[session_id]["message"] = "Cloning repository..."
